@@ -4,7 +4,7 @@ import datetime
 import webbrowser
 import threading
 import time
-from openai import OpenAI
+from openai import OpenAI  # SDK >= 1.0.0
 import os
 from functools import lru_cache
 
@@ -25,7 +25,6 @@ def analisar():
     if not txid:
         return jsonify({'resultado': '❌ TXID não informado.'}), 400
 
-    # Validação básica do formato do TXID
     if not isinstance(txid, str) or len(txid) != 64 or not all(c in '0123456789abcdefABCDEF' for c in txid):
         return jsonify({'resultado': '❌ Formato de TXID inválido. Deve ter 64 caracteres hexadecimais.'}), 400
 
@@ -106,7 +105,7 @@ def consultar_ia():
             "Destaque o endereço de troco mais provável se identificado."
         )
 
-           response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -134,7 +133,6 @@ def abrir_navegador():
         browser_opened = True
 
 if __name__ == "__main__":
-    # Verifica se o arquivo index.html existe
     template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
     if not os.path.exists(os.path.join(template_dir, 'index.html')):
         print(f"❌ Erro: index.html não encontrado em {template_dir}")
