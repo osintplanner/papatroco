@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papatroco - Analisador de Troco Bitcoin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6F42C1;
+            --primary-dark: #5A32A3;
+            --secondary: #20C997;
+            --dark: #2D3748;
+            --light: #F7FAFC;
+            --gray: #E2E8F0;
+            --dark-gray: #718096;
+            --success: #48BB78;
+            --info: #4299E1;
+            --warning: #ED8936;
+            --danger: #F56565;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 1.75rem;
+            color: var(--primary);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo-subtext {
+            font-size: 0.875rem;
+            color: var(--dark-gray);
+            margin-top: 0.25rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1AA179;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gray);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .loader {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-box {
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            background-color: var(--light);
+            border-left: 4px solid var(--success);
+        }
+
+        .result-box-ia {
+            border-left-color: var(--info);
+            background-color: #EBF8FF;
+        }
+
+        .address-highlight {
+            background-color: #F3E8FF;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            display: inline-block;
+            margin: 0.25rem 0;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .history-link:hover {
+            text-decoration: underline;
+        }
+
+        .explorer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .explorer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .explorer-link:hover {
+            background-color: var(--gray);
+        }
+
+        .transaction-details {
+            margin-top: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark);
+        }
+
+        .detail-list {
+            list-style: none;
+        }
+
+        .detail-list li {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-list li:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background-color: #E9D8FD;
+            color: var(--primary-dark);
+        }
+
+        .badge-success {
+            background-color: #C6F6D5;
+            color: #22543D;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--dark-gray);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--gray);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-coins logo-icon"></i>
+                <div>
+                    <div class="logo-text">Papatroco</div>
+                    <div class="logo-subtext">Analisador avançado de transações Bitcoin</div>
+					<div class="logo-subtext">© 2025 - Vytautas Zumas</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-outline" id="help-btn">
+                    <i class="fas fa-question-circle"></i> Ajuda
+                </button>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-search"></i> Analisar Transação
+                </h2>
+            </div>
+            <div class="form-group">
+                <label for="txid">TXID da Transação</label>
+                <input type="text" id="txid" placeholder="Exemplo: 6b7d5b8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="analisar-btn">
+                    <i class="fas fa-analytics"></i> Analisar
+                </button>
+                <button class="btn btn-outline" id="limpar-btn">
+                    <i class="fas fa-broom"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <div id="result-section" style="display: none;">
+            <div class="tabs">
+                <div class="tab active" id="analysis-tab">Análise</div>
+                <div class="tab" id="details-tab">Detalhes</div>
+                <div class="tab" id="history-tab">Histórico</div>
+            </div>
+
+            <div id="analysis-tab-content" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-check-circle"></i> Resultado da Análise
+                        </h2>
+                    </div>
+                    <div id="result-loader" class="empty-state" style="display: none;">
+                        <i class="fas fa-circle-notch fa-spin loader"></i>
+                        <p>Analisando transação...</p>
+                    </div>
+                    <div id="result-content" class="result-box"></div>
+                </div>
+
+                <div id="ia-section" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-robot"></i> Análise da IA
+                        </h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="apikey">Chave da API OpenAI</label>
+                        <input type="text" id="apikey" placeholder="Insira sua chave API (sk-...)">
+                    </div>
+                    <button class="btn btn-secondary" id="consultar-ia-btn">
+                        <i class="fas fa-brain"></i> Consultar IA
+                    </button>
+                    <div id="ia-loader" class="empty-state" style="display: none;">
+                        <i class="fas fa-circle-notch fa-spin loader"></i>
+                        <p>Processando análise...</p>
+                    </div>
+                    <div id="ia-content" class="result-box result-box-ia"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-external-link-alt"></i> Exploradores
+                        </h2>
+                    </div>
+                    <div id="explorer-links" class="explorer-links"></div>
+                </div>
+            </div>
+
+            <div id="details-tab-content" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-info-circle"></i> Detalhes da Transação
+                        </h2>
+                    </div>
+                    <div id="transaction-details" class="transaction-details"></div>
+                </div>
+            </div>
+
+            <div id="history-tab-content" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-history"></i> Histórico de Pesquisas
+                        </h2>
+                    </div>
+                    <div id="history-content">
+                        <div id="history-list"></div>
+                        <div id="empty-history" class="empty-state">
+                            <i class="fas fa-clock"></i>
+                            <p>Nenhuma pesquisa recente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="help-tab-content" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-question-circle"></i> Como Usar
+                    </h2>
+                </div>
+                <div class="transaction-details">
+                    <div class="detail-section">
+                        <h3 class="detail-title">
+                            <i class="fas fa-search"></i> Analisando Transações
+                        </h3>
+                        <p>Para analisar uma transação Bitcoin, cole o TXID (ID da transação) no campo acima e clique em "Analisar". O sistema identificará automaticamente o endereço de troco mais provável.</p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-title">
+                            <i class="fas fa-robot"></i> Análise por IA
+                        </h3>
+                        <p>Para análises mais complexas, utilize a Inteligência Artificial fornecendo sua chave de API da OpenAI. A IA oferecerá uma análise detalhada com base em padrões de blockchain.</p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-title">
+                            <i class="fas fa-lightbulb"></i> Exemplos para Teste
+                        </h3>
+                        <ul class="detail-list">
+                            <li>
+                                <span>Transação de exemplo 1</span>
+                                <span class="badge badge-primary" onclick="copyToClipboard('6b7d5b8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f')">Copiar</span>
+                            </li>
+                            <li>
+                                <span>Transação de exemplo 2</span>
+                                <span class="badge badge-primary" onclick="copyToClipboard('1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b')">Copiar</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Armazenamento do histórico de pesquisas
+        function updateHistory(txid) {
+            let history = JSON.parse(localStorage.getItem('txidHistory') || '[]');
+            if (!history.includes(txid)) {
+                history.unshift(txid);
+                if (history.length > 5) history.pop();
+                localStorage.setItem('txidHistory', JSON.stringify(history));
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('txidHistory') || []);
+            const historyList = document.getElementById('history-list');
+            const emptyHistory = document.getElementById('empty-history');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '';
+                emptyHistory.style.display = 'block';
+                return;
+            }
+
+            emptyHistory.style.display = 'none';
+            historyList.innerHTML = history.map(txid => `
+                <div class="history-item">
+                    <a href="#" class="history-link" onclick="loadFromHistory('${txid}')">
+                        ${txid.substring(0, 10)}...${txid.substring(txid.length - 10)}
+                    </a>
+                    <span class="badge badge-primary" onclick="copyToClipboard('${txid}')">Copiar</span>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(txid) {
+            document.getElementById('txid').value = txid;
+            showTab('analysis');
+            analisar();
+        }
+
+        function showTab(tabId) {
+            // Esconde todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Mostra a tab selecionada
+            document.getElementById(tabId + '-tab-content').classList.add('active');
+            
+            // Ativa o botão da tab
+            if (tabId !== 'help') {
+                document.getElementById('result-section').style.display = 'block';
+                document.getElementById(tabId + '-tab').classList.add('active');
+            } else {
+                document.getElementById('result-section').style.display = 'none';
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copiado para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+            });
+        }
+
+        function limparCampos() {
+            document.getElementById('txid').value = '';
+            document.getElementById('apikey').value = '';
+            document.getElementById('result-content').innerHTML = '';
+            document.getElementById('ia-content').innerHTML = '';
+            document.getElementById('transaction-details').innerHTML = '';
+            document.getElementById('explorer-links').innerHTML = '';
+            document.getElementById('ia-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('result-loader').style.display = 'none';
+            document.getElementById('ia-loader').style.display = 'none';
+        }
+
+        function updateExplorerLinks(txid) {
+            if (!txid) return;
+            
+            const explorers = [
+                { name: 'Mempool.space', url: `https://mempool.space/tx/${txid}`, icon: 'fas fa-cube' },
+                { name: 'Blockstream', url: `https://blockstream.info/tx/${txid}`, icon: 'fas fa-link' },
+                { name: 'OKLink', url: `https://www.oklink.com/btc/tx/${txid}`, icon: 'fas fa-globe' },
+                { name: 'Blockchain.com', url: `https://www.blockchain.com/explorer/transactions/btc/${txid}`, icon: 'fas fa-database' }
+            ];
+            
+            const linksContainer = document.getElementById('explorer-links');
+            linksContainer.innerHTML = explorers.map(explorer => `
+                <a href="${explorer.url}" target="_blank" class="explorer-link">
+                    <i class="${explorer.icon}"></i> ${explorer.name}
+                </a>
+            `).join('');
+        }
+
+        async function analisar() {
+            const txid = document.getElementById("txid").value.trim();
+            if (!txid) {
+                alert("Por favor, insira um TXID.");
+                return;
+            }
+
+            // Validação simples do formato do TXID
+            if (!/^[a-fA-F0-9]{64}$/.test(txid)) {
+                alert("TXID inválido. Deve ter 64 caracteres hexadecimais.");
+                return;
+            }
+
+            updateHistory(txid);
+            updateExplorerLinks(txid);
+            showTab('analysis');
+
+            document.getElementById('result-loader').style.display = 'block';
+            document.getElementById('result-content').innerHTML = '';
+            document.getElementById('transaction-details').innerHTML = "";
+            document.getElementById('ia-section').style.display = "none";
+            document.getElementById('ia-content').innerHTML = '';
+            document.getElementById('ia-loader').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+
+            try {
+                const response = await fetch('/analisar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txid: txid })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na requisição');
+                }
+
+                const data = await response.json();
+                
+                // Formata o resultado com destaque para o endereço
+                let resultadoHTML = data.resultado;
+                if (data.resultado.includes('Endereço de troco provável:')) {
+                    const parts = data.resultado.split('Endereço de troco provável:');
+                    resultadoHTML = `${parts[0]}<strong>Endereço de troco provável:</strong> <span class="address-highlight">${parts[1].trim()}</span>`;
+                    resultadoHTML += `<button class="copy-btn" onclick="copyToClipboard('${parts[1].trim()}')"><i class="fas fa-copy"></i></button>`;
+                }
+                
+                document.getElementById('result-content').innerHTML = resultadoHTML;
+                document.getElementById('result-loader').style.display = 'none';
+
+                const dados = data.dados;
+                if (dados) {
+                    let html = `
+                        <div class="detail-section">
+                            <h3 class="detail-title">
+                                <i class="fas fa-calendar-alt"></i> Data/Hora
+                            </h3>
+                            <p>${dados.datahora}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="detail-title">
+                                <i class="fas fa-sign-in-alt"></i> Inputs (${dados.inputs.length})
+                            </h3>
+                            <ul class="detail-list">
+                    `;
+                    
+                    dados.inputs.forEach(i => {
+                        html += `
+                            <li>
+                                <span>${i.endereco}</span>
+                                <span>${i.valor_btc.toFixed(8)} BTC (~${i.valor_usd.toFixed(2)} USD)</span>
+                            </li>
+                        `;
+                    });
+                    
+                    html += `
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="detail-title">
+                                <i class="fas fa-sign-out-alt"></i> Outputs (${dados.outputs.length})
+                            </h3>
+                            <ul class="detail-list">
+                    `;
+                    
+                    dados.outputs.forEach(o => {
+                        html += `
+                            <li>
+                                <span>${o.endereco}</span>
+                                <span>${o.valor_btc.toFixed(8)} BTC (~${o.valor_usd.toFixed(2)} USD)</span>
+                            </li>
+                        `;
+                    });
+                    
+                    html += `
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="detail-title">
+                                <i class="fas fa-chart-line"></i> Cotação
+                            </h3>
+                            <p>${dados.btc_usd ? dados.btc_usd.toFixed(2) + " USD" : "Não encontrada"}</p>
+                        </div>
+                    `;
+
+                    document.getElementById("transaction-details").innerHTML = html;
+                }
+
+                // Se o resultado indicar análise manual, oferece a opção da IA
+                if (data.resultado.includes('Análise manual recomendada')) {
+                    document.getElementById("ia-section").style.display = "block";
+                } else {
+                    document.getElementById("ia-section").style.display = "none";
+                }
+            } catch (error) {
+                document.getElementById('result-loader').style.display = 'none';
+                document.getElementById('result-content').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erro ao analisar a transação. Verifique o TXID e tente novamente.</p>
+                    </div>
+                `;
+                console.error("Erro:", error);
+            }
+        }
+
+        async function consultarIA() {
+            const txid = document.getElementById("txid").value.trim();
+            const apikey = document.getElementById("apikey").value.trim();
+            if (!apikey) {
+                alert("Por favor, cole sua API Key da OpenAI.");
+                return;
+            }
+
+            document.getElementById('ia-loader').style.display = 'block';
+            document.getElementById('ia-content').innerHTML = '';
+
+            try {
+                const response = await fetch('/consultar-ia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txid: txid, apikey: apikey })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na consulta à IA');
+                }
+
+                const data = await response.json();
+                document.getElementById('ia-content').innerHTML = data.resposta;
+                document.getElementById('ia-loader').style.display = 'none';
+            } catch (error) {
+                document.getElementById('ia-loader').style.display = 'none';
+                document.getElementById('ia-content').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erro ao consultar a IA. Verifique sua API Key e tente novamente.</p>
+                    </div>
+                `;
+                console.error("Erro:", error);
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar event listeners
+            document.getElementById('analisar-btn').addEventListener('click', analisar);
+            document.getElementById('consultar-ia-btn').addEventListener('click', consultarIA);
+            document.getElementById('limpar-btn').addEventListener('click', limparCampos);
+            document.getElementById('help-btn').addEventListener('click', () => showTab('help'));
+            
+            // Configurar tabs
+            document.getElementById('analysis-tab').addEventListener('click', () => showTab('analysis'));
+            document.getElementById('details-tab').addEventListener('click', () => showTab('details'));
+            document.getElementById('history-tab').addEventListener('click', () => showTab('history'));
+            
+            // Permitir Enter no campo TXID
+            document.getElementById('txid').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    analisar();
+                }
+            });
+            
+            // Inicializar histórico
+            renderHistory();
+        });
+    </script>
+</body>
+</html>
