@@ -106,7 +106,7 @@ def consultar_ia():
             "Destaque o endereço de troco mais provável se identificado."
         )
 
-        response = client.chat.completions.create(
+           response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
