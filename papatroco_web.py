@@ -116,11 +116,10 @@ def consultar_ia():
     max_tokens=500
 )
 resposta = response.choices[0].message.content
-        return jsonify({'resposta': resposta})
-
-    except Exception as e:
-        app.logger.error(f"Erro ao consultar IA para transação {txid}: {str(e)}")
-        return jsonify({'resposta': '❌ Erro ao consultar a IA. Verifique sua API Key e tente novamente.'}), 500
+    return jsonify({'resposta': resposta})
+except Exception as e:
+    app.logger.error(f"Erro ao consultar IA para transação {txid}: {str(e)}")
+    return jsonify({'resposta': '❌ Erro ao consultar a IA. Verifique sua API Key e tente novamente.'}), 500
 
 def abrir_navegador():
     global browser_opened
