@@ -106,20 +106,16 @@ def consultar_ia():
             "Destaque o endereço de troco mais provável se identificado."
         )
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "Você é um analista especializado em blockchain Bitcoin com foco em análise forense."
-                },
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=500
-        )
-
-        resposta = response.choices[0].message.content.strip()
+        rresponse = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "Você é um analista especializado em blockchain Bitcoin."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.3,
+    max_tokens=500
+)
+resposta = response.choices[0].message.content
         return jsonify({'resposta': resposta})
 
     except Exception as e:
