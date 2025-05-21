@@ -106,20 +106,25 @@ def consultar_ia():
             "Destaque o endereço de troco mais provável se identificado."
         )
 
-        rresponse = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "Você é um analista especializado em blockchain Bitcoin."},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.3,
-    max_tokens=500
-)
-resposta = response.choices[0].message.content
-    return jsonify({'resposta': resposta})
-except Exception as e:
-    app.logger.error(f"Erro ao consultar IA para transação {txid}: {str(e)}")
-    return jsonify({'resposta': '❌ Erro ao consultar a IA. Verifique sua API Key e tente novamente.'}), 500
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "Você é um analista especializado em blockchain Bitcoin com foco em análise forense."
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=500
+        )
+
+        resposta = response.choices[0].message.content.strip()
+        return jsonify({'resposta': resposta})
+
+    except Exception as e:
+        app.logger.error(f"Erro ao consultar IA para transação {txid}: {str(e)}")
+        return jsonify({'resposta': '❌ Erro ao consultar a IA. Verifique sua API Key e tente novamente.'}), 500
 
 def abrir_navegador():
     global browser_opened
